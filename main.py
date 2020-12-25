@@ -105,6 +105,7 @@ if __name__ == '__main__':
             for x in dyf_df[dyf_df['visible']]['2theta'].unique():
                 axs[i].axvline(x, color='r', alpha=0.5, linestyle=':')
             axs[i].set_title(f)
+    axs[-1].set_xlabel('2theta')
     plt.subplots_adjust(hspace=0.5)
     plt.savefig(os.path.join(RESULTS_PATH, f'dyf_{album}.svg'))
     plt.show()
