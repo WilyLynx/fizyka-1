@@ -7,6 +7,7 @@ import pandas as pd
 
 ORIGIN_LAMBDA = 1.4667
 MAX_HKL = 8
+RESULTS_PATH = 'results'
 
 element_df = pd.DataFrame(np.array([
     [1, 'V', 'bcc', 3.02],
@@ -91,8 +92,10 @@ if __name__ == '__main__':
                                calculate_F(row['h'], row['k'], row['l'], particle_record['structure'].values[0]),
                                axis=1)
     dyf_df['visible'] = dyf_df.apply(lambda row: row['F'] > 0, axis=1)
-    dyf_df = dyf_df[dyf_df['2sigma'] <= 90]
-    dyf_df = dyf_df.dropna()
+    dyf_df = dyf_df[dyf_df['2sigma'] <= 90].sort_values(by='2sigma')
+    if not os.path.exists(RESULTS_PATH):
+        os.mkdir(RESULTS_PATH)
+    dyf_df.to_latex(os.path.join(RESULTS_PATH, f'table_{album}.tex'), index=False)
     dyf_files = os.listdir('data')
     fig, axs = plt.subplots(figsize=(6, 10), nrows=len(dyf_files), sharex=True)
     for i, f in enumerate(dyf_files):
@@ -101,5 +104,7 @@ if __name__ == '__main__':
             axs[i].plot(plt_data[:, 0], plt_data[:, 1], '-', linewidth=1)
             for x in dyf_df[dyf_df['visible']]['2sigma'].unique():
                 axs[i].axvline(x, color='r', alpha=0.5, linestyle=':')
-    plt.savefig(f'dyf_{album}.svg')
+            axs[i].set_title(f)
+    plt.subplots_adjust(hspace=0.5)
+    plt.savefig(os.path.join(RESULTS_PATH, f'dyf_{album}.svg'))
     plt.show()
