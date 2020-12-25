@@ -22,7 +22,7 @@ element_df['num'] = element_df['num'].astype(int)
 element_df['network constant'] = element_df['network constant'].astype(float)
 
 
-def get_wulf_bragg_2sigma(d_hkl, source_lambda):
+def get_wulf_bragg_2theta(d_hkl, source_lambda):
     return np.degrees(2 * np.arcsin((1 / d_hkl) * source_lambda / 2))
 
 
@@ -87,12 +87,12 @@ if __name__ == '__main__':
         k=row['k'],
         l=row['l']
     ), axis=1)
-    dyf_df['2sigma'] = dyf_df.apply(lambda row: get_wulf_bragg_2sigma(row['d_hkl'], ORIGIN_LAMBDA), axis=1)
+    dyf_df['2theta'] = dyf_df.apply(lambda row: get_wulf_bragg_2theta(row['d_hkl'], ORIGIN_LAMBDA), axis=1)
     dyf_df['F'] = dyf_df.apply(lambda row:
                                calculate_F(row['h'], row['k'], row['l'], particle_record['structure'].values[0]),
                                axis=1)
     dyf_df['visible'] = dyf_df.apply(lambda row: row['F'] > 0, axis=1)
-    dyf_df = dyf_df[dyf_df['2sigma'] <= 90].sort_values(by='2sigma')
+    dyf_df = dyf_df[dyf_df['2theta'] <= 90].sort_values(by='2theta')
     if not os.path.exists(RESULTS_PATH):
         os.mkdir(RESULTS_PATH)
     dyf_df.to_latex(os.path.join(RESULTS_PATH, f'table_{album}.tex'), index=False)
@@ -102,7 +102,7 @@ if __name__ == '__main__':
         with open(os.path.join('data', f)) as df:
             plt_data = pd.read_table(df, header=None, delim_whitespace=True).to_numpy()
             axs[i].plot(plt_data[:, 0], plt_data[:, 1], '-', linewidth=1)
-            for x in dyf_df[dyf_df['visible']]['2sigma'].unique():
+            for x in dyf_df[dyf_df['visible']]['2theta'].unique():
                 axs[i].axvline(x, color='r', alpha=0.5, linestyle=':')
             axs[i].set_title(f)
     plt.subplots_adjust(hspace=0.5)
